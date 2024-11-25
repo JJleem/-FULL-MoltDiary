@@ -5,11 +5,12 @@ import ProfileSection from "@/components/common/profile/ProfileSection";
 import GithubGrass from "@/components/github/GithubGrass";
 
 import { RootState } from "@/store/store";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function Home() {
   const date = useSelector((state: RootState) => state.setDate.date);
-
+  const [commits, setCommits] = useState([]);
   return (
     <div className="w-full flex flex-col items-center gap-12 2xl:pl-[240px] 2xl:pr-[240px] xl:pl-[160px] xl:pr-[160px] pb-[150px] lg:pl-[120px] lg:pr-[120px] xxs:pl-[24px] xxs:pr-[24px] overflow-x-hidden relative">
       <Aside />
