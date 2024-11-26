@@ -18,12 +18,19 @@ import CustomImage from "./CustomImage";
 import ColorPicker from "./ColorPicker";
 import FontSizeExtension from "./FontSizeExtension";
 import FontSizePicker from "./fontSizePicker";
+import { AppDispatch } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { addPost } from "@/store/postSlice";
+import { useRouter } from "next/navigation";
 
 const AdvancedTipTapEditor: React.FC = () => {
   const [url, setUrl] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [altText, setAltText] = useState("");
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const dispatch: AppDispatch = useDispatch();
+  const [isPosting, setIsPosting] = useState(false);
+  const router = useRouter();
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -48,33 +55,48 @@ const AdvancedTipTapEditor: React.FC = () => {
     return null;
   }
 
-  const handleServerSubmit = async () => {
-    const content = editor.getHTML(); // 에디터의 내용을 HTML로 가져오기
+  // const handleServerSubmit = async () => {
+  //   const content = editor.getHTML(); // 에디터의 내용을 HTML로 가져오기
 
-    const data = {
-      title,
-      content,
-    };
+  //   const data = {
+  //     title,
+  //     content,
+  //   };
 
-    try {
-      const response = await fetch("/api/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+  //   try {
+  //     const response = await fetch("/api/submit", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(data),
+  //     });
 
-      if (!response.ok) {
-        throw new Error("서버 요청에 실패했습니다.");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("서버 요청에 실패했습니다.");
+  //     }
 
-      // 요청 성공 시 처리
-      alert("서버에 성공적으로 전송되었습니다!");
-    } catch (error) {
-      console.error("에러 발생:", error);
-      alert("서버 전송 중 오류가 발생했습니다.");
-    }
+  //     // 요청 성공 시 처리
+  //     alert("서버에 성공적으로 전송되었습니다!");
+  //   } catch (error) {
+  //     console.error("에러 발생:", error);
+  //     alert("서버 전송 중 오류가 발생했습니다.");
+  //   }
+  // };
+
+  const handleServerSubmit = () => {
+    if (!editor || !editor.isEditable) return;
+    const content = editor.getHTML();
+
+    dispatch(
+      addPost({
+        title,
+        content,
+      })
+    );
+    setTitle("");
+    editor.commands.clearContent();
+    setIsPosting(true);
   };
 
   const handleSubmit = () => {
@@ -150,6 +172,26 @@ const AdvancedTipTapEditor: React.FC = () => {
 
   return (
     <div className="border border-gray-300 p-4 rounded ">
+      {isPosting ? (
+        <div className="absolute border bg-white z-10 p-10 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col">
+          글작성에 성공하였습니다!
+          <div className="w-full justify-around flex flex-col">
+            <button
+              className="mt-4 bg-Bermuda text-white p-2 rounded hover:bg-blue-600"
+              onClick={() => router.push("/")}
+            >
+              작성글 보러가기
+            </button>
+            <button
+              className="mt-4 bg-LittleBoyBlue text-white p-2 rounded hover:bg-blue-600"
+              onClick={() => setIsPosting(false)}
+            >
+              추가 작성하기
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <input
         type="text"
         value={title}
@@ -378,12 +420,12 @@ const AdvancedTipTapEditor: React.FC = () => {
       </div>
 
       {/* 에디터 콘텐츠 */}
-      <div className={styles.editorContent}>
+      <div className={`${styles.editorContent} min-h-[500px]`}>
         <EditorContent editor={editor} spellCheck="false" />
       </div>
       <button
         onClick={handleServerSubmit}
-        className="mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        className="mt-4 bg-LittleBoyBlue text-white p-2 rounded hover:bg-blue-600"
       >
         제출하기
       </button>
