@@ -73,7 +73,7 @@ const AdvancedTipTapEditor: React.FC = () => {
 
     // editor 상태가 손상되지 않도록 내용 초기화
     if (editor.isEmpty) {
-      editor.commands.setContent("<p></p>"); // 기본 상태로 초기화
+      editor.commands.setContent(""); // 기본 상태로 초기화
     } else {
       editor.commands.clearContent(); // 기존 내용을 지움
     }
