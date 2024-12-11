@@ -55,48 +55,31 @@ const AdvancedTipTapEditor: React.FC = () => {
     return null;
   }
 
-  // const handleServerSubmit = async () => {
-  //   const content = editor.getHTML(); // 에디터의 내용을 HTML로 가져오기
-
-  //   const data = {
-  //     title,
-  //     content,
-  //   };
-
-  //   try {
-  //     const response = await fetch("/api/submit", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(data),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error("서버 요청에 실패했습니다.");
-  //     }
-
-  //     // 요청 성공 시 처리
-  //     alert("서버에 성공적으로 전송되었습니다!");
-  //   } catch (error) {
-  //     console.error("에러 발생:", error);
-  //     alert("서버 전송 중 오류가 발생했습니다.");
-  //   }
-  // };
-
   const handleServerSubmit = () => {
-    if (!editor || !editor.isEditable) return;
+    if (!editor || !editor.isEditable) return; // editor 상태 확인
     const content = editor.getHTML();
 
+    // 현재 날짜 및 시간 생성
+    const timestamp = new Date().toISOString(); // ISO 8601 형식 (예: 2024-12-11T14:30:00.000Z)
+
+    // 게시물 데이터 디스패치
     dispatch(
       addPost({
         title,
         content,
+        timestamp, // 현재 시간 추가
       })
     );
-    setTitle("");
-    editor.commands.clearContent();
-    setIsPosting(true);
+
+    // editor 상태가 손상되지 않도록 내용 초기화
+    if (editor.isEmpty) {
+      editor.commands.setContent("<p></p>"); // 기본 상태로 초기화
+    } else {
+      editor.commands.clearContent(); // 기존 내용을 지움
+    }
+
+    setTitle(""); // 제목 초기화
+    setIsPosting(true); // 게시 상태 설정
   };
 
   const handleSubmit = () => {
