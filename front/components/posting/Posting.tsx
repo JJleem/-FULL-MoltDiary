@@ -14,7 +14,6 @@ interface dateProps {
 const Posting: React.FC<dateProps> = ({ date }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state: RootState) => state.posts);
-  const post = [...posts];
 
   const router = useRouter();
   useEffect(() => {
@@ -48,7 +47,12 @@ const Posting: React.FC<dateProps> = ({ date }) => {
 
   return (
     <div className="w-full border border-red-500">
-      <div>작성일: {date === "" ? formatDate(post[0].timestamp) : date}</div>
+      <div>
+        작성일:
+        {date === "" && posts.length > 0 && posts[0]?.timestamp
+          ? formatDate(posts[0]?.timestamp)
+          : date || ""}
+      </div>
       <div>
         {[...posts]
           .slice()
