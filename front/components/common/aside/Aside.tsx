@@ -29,7 +29,7 @@ const Aside = () => {
       onClick={handleClickToggle}
     >
       <div
-        className={`sm:hidden w-[80%] h-full    px-8 flex absolute bg-white  z-52 transition-right duration-500 ${
+        className={`sm:hidden w-[80%] h-full px-8 flex absolute bg-white  z-52 transition-right duration-500 ${
           isToggled ? "right-0" : "-right-full"
         }`}
         onClick={(e) => e.stopPropagation()}

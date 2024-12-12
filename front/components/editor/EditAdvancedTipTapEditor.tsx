@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import BulletList from "@tiptap/extension-bullet-list";
@@ -11,7 +11,7 @@ import Image from "@tiptap/extension-image";
 import Color from "@tiptap/extension-color";
 import TextStyle from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
-import TextAlign from "@tiptap/extension-text-align"; // 정렬 확장 추가
+import TextAlign from "@tiptap/extension-text-align";
 import styles from "./AdvancedTipTapEditor.module.css";
 import "./EditorStyles.css";
 import CustomImage from "./CustomImage";
@@ -19,97 +19,37 @@ import ColorPicker from "./ColorPicker";
 import FontSizeExtension from "./FontSizeExtension";
 import FontSizePicker from "./fontSizePicker";
 import { AppDispatch } from "@/store/store";
-import { useDispatch } from "react-redux";
-import { addPost } from "@/store/postSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { updatePost } from "@/store/postSlice";
 import { useRouter } from "next/navigation";
 
-const AdvancedTipTapEditor: React.FC = () => {
+interface EditAdvancedTipTapEditorProps {
+  postId: string; // 수정할 게시물 ID
+}
+
+const EditAdvancedTipTapEditor: React.FC<EditAdvancedTipTapEditorProps> = ({
+  postId,
+}) => {
+  const dispatch: AppDispatch = useDispatch();
+  const router = useRouter();
+
+  // Redux 상태에서 게시물 가져오기
+  const posts = useSelector((state: RootState) => state.posts);
+  const [title, setTitle] = useState<string>("");
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [initialContent, setInitialContent] = useState<string>("");
   const [url, setUrl] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [altText, setAltText] = useState("");
-  const [title, setTitle] = useState<string>("");
-  const dispatch: AppDispatch = useDispatch();
-  const [isPosting, setIsPosting] = useState(false);
-  const router = useRouter();
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      BulletList,
-      OrderedList,
-      ListItem,
-      Link.configure({
-        openOnClick: false,
-      }),
-      CustomImage,
-      Image,
-      Underline,
-      TextStyle,
-      Color,
-      FontSizeExtension,
-      TextAlign.configure({ types: ["heading", "paragraph", "image"] }), // 정렬 기능 추가
-    ],
-    content: "<p >여기에 글을 작성하세요...</p>",
-  });
-
-  if (!editor) {
-    return null;
-  }
-
-  const handleServerSubmit = () => {
-    if (!editor || !editor.isEditable) return; // editor 상태 확인
-    const content = editor.getHTML();
-
-    // 현재 날짜 및 시간 생성
-    const timestamp = new Date().toISOString(); // ISO 8601 형식 (예: 2024-12-11T14:30:00.000Z)
-
-    // 게시물 데이터 디스패치
-    dispatch(
-      addPost({
-        title,
-        content,
-        timestamp, // 현재 시간 추가
-      })
-    );
-
-    // editor 상태가 손상되지 않도록 내용 초기화
-    if (editor.isEmpty) {
-      editor.commands.setContent(""); // 기본 상태로 초기화
-    } else {
-      editor.commands.clearContent(); // 기존 내용을 지움
+  // postId에 해당하는 게시물 데이터 로드
+  useEffect(() => {
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      setTitle(post.title);
+      setInitialContent(post.content);
     }
-
-    setTitle(""); // 제목 초기화
-    setIsPosting(true); // 게시 상태 설정
-  };
-
-  const handleSubmit = () => {
-    if (url) {
-      if (editor.state.selection.empty) {
-        // 선택된 텍스트가 없을 경우 대체 텍스트를 링크로 삽입
-        editor
-          .chain()
-          .focus()
-          .insertContent(
-            `<a href="${url}" target="_blank">${altText || "링크"}</a>`
-          )
-          .run();
-      } else {
-        // 선택된 텍스트가 있는 경우 해당 텍스트에 링크를 설정
-        editor
-          .chain()
-          .focus()
-          .extendMarkRange("link")
-          .setLink({ href: url })
-          .run();
-      }
-      setUrl("");
-      setAltText("");
-      setIsFormVisible(false);
-    }
-  };
-
-  
-
+  }, [postId, posts]);
   const addImage = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -122,7 +62,7 @@ const AdvancedTipTapEditor: React.FC = () => {
         reader.onload = () => {
           const url = reader.result as string;
           // TipTap 에디터에 이미지 삽입
-          editor.chain().focus().setImage({ src: url }).run();
+          editor?.chain().focus().setImage({ src: url }).run();
         };
         reader.readAsDataURL(file);
       }
@@ -131,27 +71,93 @@ const AdvancedTipTapEditor: React.FC = () => {
     input.click();
   };
 
+  const handleSubmit = () => {
+    if (url) {
+      if (editor?.state.selection.empty) {
+        // 선택된 텍스트가 없을 경우 대체 텍스트를 링크로 삽입
+        editor
+          .chain()
+          .focus()
+          .insertContent(
+            `<a href="${url}" target="_blank">${altText || "링크"}</a>`
+          )
+          .run();
+      } else {
+        // 선택된 텍스트가 있는 경우 해당 텍스트에 링크를 설정
+        editor
+          ?.chain()
+          .focus()
+          .extendMarkRange("link")
+          .setLink({ href: url })
+          .run();
+      }
+      setUrl("");
+      setAltText("");
+      setIsFormVisible(false);
+    }
+  };
+
+  // 에디터 초기화
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      BulletList,
+      OrderedList,
+      ListItem,
+      Link.configure({ openOnClick: false }),
+      CustomImage,
+      Image,
+      Underline,
+      TextStyle,
+      Color,
+      FontSizeExtension,
+      TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
+    ],
+    content: initialContent,
+  });
+  // 에디터 초기화 이후 콘텐츠 설정
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [editor, initialContent]);
+
+  if (!editor) {
+    return null;
+  }
+
+  const handleSave = () => {
+    if (!editor || !editor.isEditable) return;
+    const content = editor.getHTML();
+    const timestamp = new Date().toISOString();
+
+    setIsSaving(true);
+
+    // Redux에 업데이트 디스패치
+    dispatch(
+      updatePost({
+        id: postId,
+        title,
+        content,
+        timestamp,
+      })
+    );
+
+    // 저장 후 상태 초기화
+    setTimeout(() => {
+      setIsSaving(false);
+      router.push("/"); // 저장 완료 후 메인 페이지로 이동
+    }, 1000);
+  };
+
   return (
-    <div className="border border-gray-300 p-4 rounded ">
-      {isPosting ? (
+    <div className="border border-gray-300 p-4 rounded">
+      {isSaving && (
         <div className="absolute border bg-white z-10 p-10 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col">
-          글작성에 성공하였습니다!
-          <div className="w-full justify-around flex flex-col">
-            <button
-              className="mt-4 bg-Bermuda text-white p-2 rounded hover:bg-blue-600"
-              onClick={() => router.push("/")}
-            >
-              작성글 보러가기
-            </button>
-            <button
-              className="mt-4 bg-LittleBoyBlue text-white p-2 rounded hover:bg-blue-600"
-              onClick={() => setIsPosting(false)}
-            >
-              추가 작성하기
-            </button>
-          </div>
+          저장 중...
         </div>
-      ) : null}
+      )}
+
       <input
         type="text"
         value={title}
@@ -159,7 +165,8 @@ const AdvancedTipTapEditor: React.FC = () => {
         placeholder="제목을 입력하세요"
         className="w-full mb-4 p-2 border rounded text-lg"
       />
-      {/* 툴바 구성 */}
+
+      {/* 툴바 */}
       <div className="mb-12 flex sm:gap-4 w-full xs:justify-between sm:justify-start  ">
         <div className="tooltip-container ">
           <button
@@ -383,14 +390,15 @@ const AdvancedTipTapEditor: React.FC = () => {
       <div className={`${styles.editorContent} min-h-[500px]`}>
         <EditorContent editor={editor} spellCheck="false" />
       </div>
+
       <button
-        onClick={handleServerSubmit}
-        className="mt-4 bg-LittleBoyBlue text-white p-2 rounded hover:bg-blue-600"
+        onClick={handleSave}
+        className="mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
       >
-        제출하기
+        수정 완료
       </button>
     </div>
   );
 };
 
-export default AdvancedTipTapEditor;
+export default EditAdvancedTipTapEditor;

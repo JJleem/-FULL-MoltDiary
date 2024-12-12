@@ -25,7 +25,9 @@ export default function Home() {
           <div className="w-[100%] flex gap-1.5 border-b border-AlmondPeach pb-3 justify-between items-center">
             <div className="flex items-center gap-1.5 w-full">
               <span>전체 게시글</span>
-              <span className="text-PeachFuzz ">{posts.length}</span>
+              <span className="text-PeachFuzz ">
+                {posts.length === 0 ? "-" : posts.length}
+              </span>
             </div>
             <form className="relative">
               <input

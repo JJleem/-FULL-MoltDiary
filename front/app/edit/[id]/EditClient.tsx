@@ -1,5 +1,6 @@
 "use client";
 
+import EditAdvancedTipTapEditor from "@/components/editor/EditAdvancedTipTapEditor";
 import { useRouter } from "next/navigation";
 
 interface EditClientProps {
@@ -7,12 +8,10 @@ interface EditClientProps {
 }
 
 const EditClient: React.FC<EditClientProps> = ({ id }) => {
-  const router = useRouter();
-
   return (
-    <div className="w-full h-[500px]">
-      <h1>postId/params: {id}</h1>
-      <button onClick={() => router.push("/")}>돌아가기</button>
+    <div className="max-w-3xl mx-auto min-h-[91vh]  pb-[200px] p-6">
+      <h1 className="text-2xl font-bold mb-4">글 수정하기</h1>
+      <EditAdvancedTipTapEditor postId={id} />
     </div>
   );
 };

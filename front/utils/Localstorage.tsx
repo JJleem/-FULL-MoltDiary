@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // utils/localStorage.ts
 export const loadState = (): any => {
   try {

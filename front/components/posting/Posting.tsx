@@ -51,7 +51,7 @@ const Posting: React.FC<dateProps> = ({ date }) => {
         작성일:
         {date === "" && posts.length > 0 && posts[0]?.timestamp
           ? formatDate(posts[0]?.timestamp)
-          : date || ""}
+          : date || " -"}
       </div>
       <div>
         {[...posts]
