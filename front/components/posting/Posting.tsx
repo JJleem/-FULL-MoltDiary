@@ -42,11 +42,11 @@ const Posting: React.FC<dateProps> = ({ date }) => {
     const day = String(date.getDate()).padStart(2, "0"); // 일자가 한 자리일 경우 앞에 0 추가
 
     // "YYYY-MM-DD" 형식으로 반환
-    return `${year}년 ${month}월 ${day}일`;
+    return ` ${year}년 ${month}월 ${day}일`;
   }
 
   return (
-    <div className="w-full border border-red-500">
+    <div className="w-full ">
       <div>
         작성일:
         {date === "" && posts.length > 0 && posts[0]?.timestamp

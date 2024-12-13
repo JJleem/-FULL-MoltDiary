@@ -6,12 +6,21 @@ import GithubGrass from "@/components/github/GithubGrass";
 import Posting from "@/components/posting/Posting";
 
 import { RootState } from "@/store/store";
+import { useEffect, useState } from "react";
 
 import { useSelector } from "react-redux";
 
 export default function Home() {
   const date = useSelector((state: RootState) => state.setDate.date);
   const posts = useSelector((state: RootState) => state.posts);
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null;
 
   return (
     <div className="w-full flex flex-col items-center gap-12 2xl:pl-[240px] 2xl:pr-[240px] xl:pl-[160px] xl:pr-[160px] pb-[150px] lg:pl-[120px] lg:pr-[120px] xxs:pl-[24px] xxs:pr-[24px] overflow-x-hidden relative">
